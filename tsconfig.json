@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "moduleResolution": "NodeNext",  
+    "module": "NodeNext",  
+    "allowJs": true,
+    "target": "ES2020",
+    "outDir": "./dist",
+    "rootDir": "src",
+    "resolveJsonModule": true,
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "baseUrl": ".",
+    "paths": {
+      "config/*": ["src/config/*"]
+    }
+  },
+  "include": ["src"],
+  "exclude": ["node_modules", "dist"]
+}
