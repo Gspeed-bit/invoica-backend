@@ -1,5 +1,7 @@
 # Ignore sensitive environment files for backend
 .env
+.env.local
+.env.*.local
 
 # Ignore node_modules (installed packages)
 node_modules/
