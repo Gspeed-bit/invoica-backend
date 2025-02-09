@@ -1,0 +1,23 @@
+# Node modules
+node_modules/
+
+# Build directories for Next.js (Frontend)
+.next/
+out/
+dist/
+
+# Environment variable files (Local)
+.env.local
+.env.*.local
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+
+# IDE folders
+.idea/
+.vscode/
+
+# Operating system files
+.DS_Store
+Thumbs.db

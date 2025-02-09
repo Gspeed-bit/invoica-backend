@@ -6,6 +6,7 @@ import expressBasicAuth from 'express-basic-auth';
 import swaggerDocs from './swaggerConfig';
 import swaggerUI from 'swagger-ui-express';
 import { KEYS } from 'config/config';
+import authRoutes from './components/user/routes/authRoutes';
 
 const app = express();
 app.use(cors());
@@ -24,7 +25,8 @@ connectToMongoose()
     console.error('Error connecting to MongoDB:', err);
   });
 
-  
+  app.use('/', authRoutes);
+
 app.use(
   '/api-docs',
   expressBasicAuth({

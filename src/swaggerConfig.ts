@@ -36,7 +36,7 @@ const swaggerOptions = {
     ],
   },
   apis: [
-    './src/components/auth/routes/**/*.ts',
+    './src/components/user/routes/**/*.ts',
     './src/components/invoice/routes/**/*.ts',
     './src/components/payment/routes/**/*.ts',
   ],

@@ -10,6 +10,7 @@ const express_basic_auth_1 = __importDefault(require("express-basic-auth"));
 const swaggerConfig_1 = __importDefault(require("./swaggerConfig"));
 const swagger_ui_express_1 = __importDefault(require("swagger-ui-express"));
 const config_1 = require("./config/config");
+const authRoutes_1 = __importDefault(require("./components/user/routes/authRoutes"));
 const app = (0, express_1.default)();
 app.use((0, cors_1.default)());
 app.use(express_1.default.json());
@@ -24,6 +25,7 @@ app.get('/', (req, res) => {
     .catch((err) => {
     console.error('Error connecting to MongoDB:', err);
 });
+app.use('/', authRoutes_1.default);
 app.use('/api-docs', (0, express_basic_auth_1.default)({
     users: { [config_1.KEYS.serverUsername]: config_1.KEYS.serverPassword },
     challenge: true,

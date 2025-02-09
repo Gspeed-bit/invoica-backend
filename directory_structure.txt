@@ -1,0 +1,22 @@
+.
+├── .env
+├── .eslintrc.json
+├── README.md
+├── directory_structure.txt
+├── dist
+│   ├── config
+│   │   ├── config.js
+│   │   └── mongoose.js
+│   ├── index.js
+│   └── swaggerConfig.js
+├── package-lock.json
+├── package.json
+├── src
+│   ├── config
+│   │   ├── config.ts
+│   │   └── mongoose.ts
+│   ├── index.ts
+│   └── swaggerConfig.ts
+└── tsconfig.json
+
+5 directories, 15 files
