@@ -1,5 +1,11 @@
 import express from 'express';
-import { register, login, resetPassword, resetPasswordRequest, verifyEmail } from '../controllers/authController';
+import {
+  register,
+  login,
+  resetPassword,
+  verifyEmail,
+  forgotPassword,
+} from '../controllers/authController';
 
 const router = express.Router();
 
@@ -8,7 +14,7 @@ const router = express.Router();
  * /register:
  *   post:
  *     summary: Register a new user
- *     description: Creates a new user and sends an email verification link
+ *     description: Creates a new user and sends an email verification link.
  *     requestBody:
  *       required: true
  *       content:
@@ -49,8 +55,27 @@ const router = express.Router();
  *     responses:
  *       201:
  *         description: User successfully created
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "User registered successfully. Please check your email to verify your account."
+ *                 token:
+ *                   type: string
+ *                   example: "jwt_token"  # Include token in response example
  *       400:
- *         description: Bad request, validation errors or email already taken
+ *         description: Bad request, validation errors, or email/username already taken
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Username or email already exists"
  *       500:
  *         description: Internal server error
  */
@@ -59,7 +84,7 @@ router.post('/register', register);
 
 /**
  * @swagger
- * /auth/login:
+ * /login:
  *   post:
  *     summary: Login a user
  *     description: Login a user with either email or username.
@@ -81,25 +106,68 @@ router.post('/register', register);
  *         description: User logged in successfully
  *         content:
  *           application/json:
- *           schema:
- *             type: object
- *             properties:
- *               token:
- *                 type: string
- *                 example: "jwt_token"
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 token:
+ *                   type: string
+ *                   example: "jwt_token"
+ *                 user:
+ *                   type: object
+ *                   properties:
+ *                     _id:
+ *                       type: string
+ *                       example: "user_id"
+ *                     firstName:
+ *                       type: string
+ *                       example: "John"
+ *                     lastName:
+ *                       type: string
+ *                       example: "Doe"
+ *                     email:
+ *                       type: string
+ *                       example: "user@example.com"
+ *                     username:
+ *                       type: string
+ *                       example: "john_doe"
+ *                     phone:
+ *                       type: string
+ *                       example: "+1234567890"
+ *                     businessName:
+ *                       type: string
+ *                       example: "Doe Enterprises"
+ *                     accountType:
+ *                       type: string
+ *                       example: "individual"
  *       400:
  *         description: Invalid email/username or password
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Invalid email/username or password"
  *       500:
  *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Internal server error"
  */
-router.post('/login', login);
 
+router.post('/login', login);
 
 /**
  * @swagger
- * /auth/reset-password-request:
+ * /forgot-password:
  *   post:
- *     summary: Request password reset
+ *     summary: Forgot password reset
  *     description: Sends a password reset link to the user email if the email exists.
  *     requestBody:
  *       required: true
@@ -119,11 +187,11 @@ router.post('/login', login);
  *       500:
  *         description: Internal server error
  */
-router.post('/reset-password-request', resetPasswordRequest);
+router.post('/reset-password-request', forgotPassword);
 
 /**
  * @swagger
- * /auth/reset-password:
+ * /reset-password:
  *   post:
  *     summary: Reset user password
  *     description: Resets the password with the token and new password.
@@ -150,10 +218,9 @@ router.post('/reset-password-request', resetPasswordRequest);
  */
 router.post('/reset-password', resetPassword);
 
-
 /**
  * @swagger
- * /auth/verify-email:
+ * /verify:
  *   get:
  *     summary: Verify user's email
  *     description: Verifies the user's email address using the token sent to their email.
@@ -167,12 +234,21 @@ router.post('/reset-password', resetPassword);
  *     responses:
  *       200:
  *         description: Email verified successfully
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: "Email verified successfully"
  *       400:
  *         description: Invalid or expired token
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: "Invalid or expired token"
  *       500:
  *         description: Server error
  */
-router.get('/verify-email', verifyEmail);
+
+router.get('/verify', verifyEmail);
 
 export default router;
 // Compare this snippet from src/components/user/routes/authRoutes.ts:

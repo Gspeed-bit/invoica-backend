@@ -3,9 +3,8 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import User from '../models/userModel';
 import crypto from 'crypto';
-import { sendVerificationEmail } from 'src/utils/email/emailUtils';
-
-
+import { sendResetLink, sendVerificationEmail } from 'src/utils/email/emailUtils';
+import { sanitizeUser } from 'src/sanitizeUser';
 
 export const register = async (req: Request, res: Response) => {
   const {
@@ -40,7 +39,12 @@ export const register = async (req: Request, res: Response) => {
     const hashedPassword = await bcrypt.hash(password, salt);
 
     // Generate email verification token
-    const emailVerificationToken = crypto.randomBytes(32).toString('hex');
+    const emailVerificationToken = jwt.sign(
+      { email },
+      process.env.JWT_SECRET as string,
+      { expiresIn: '1h' }
+    );
+    console.log(emailVerificationToken);
     const emailVerificationExpires = Date.now() + 3600000; // 1 hour
 
     const user = new User({
@@ -52,19 +56,13 @@ export const register = async (req: Request, res: Response) => {
       businessName,
       accountType,
       password: hashedPassword,
-      emailVerificationToken,
       emailVerificationExpires,
     });
 
     await user.save();
 
     // Send verification email
-    const verificationLink = `${process.env.FRONTEND_URL}/auth/verify-email?token=${emailVerificationToken}`;
-    await sendVerificationEmail(
-      user.email,
-      'Email Verification',
-      `Please verify your email by clicking the following link: ${verificationLink}`
-    );
+    await sendVerificationEmail(email, emailVerificationToken);
 
     res.status(201).json({
       message:
@@ -80,15 +78,21 @@ export const login = async (req: Request, res: Response) => {
   const { emailOrUsername, password } = req.body;
 
   try {
-    // Check if user exists by email or username
+    // Check if user exists by email or username, excluding the password field
     const user = await User.findOne({
       $or: [{ email: emailOrUsername }, { username: emailOrUsername }],
-    });
+    }).select(
+      'password firstName lastName email username phone businessName accountType'
+    ); // Ensure password is included here
 
     if (!user)
       return res
         .status(400)
         .json({ message: 'Invalid email/username or password' });
+
+    // Check if the user has a password
+    if (!user.password)
+      return res.status(400).json({ message: 'User does not have a password' });
 
     // Compare password
     const isMatch = await bcrypt.compare(password, user.password);
@@ -104,15 +108,22 @@ export const login = async (req: Request, res: Response) => {
       { expiresIn: '1h' }
     );
 
-    res.json({ token });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Server error' });
+    // Sanitize the user object by removing the password and other sensitive fields
+    const sanitizedUser = sanitizeUser(user, ['password']);
+
+    // Return the token and user data (excluding password) in the response
+    res.status(200).json({
+      token,
+      user: sanitizedUser, // Include user data in the response
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
 
 // Request Password Reset
-export const resetPasswordRequest = async (
+export const forgotPassword = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
@@ -128,12 +139,14 @@ export const resetPasswordRequest = async (
 
     await user.save();
 
-    const resetLink = `${process.env.FRONTEND_URL}/auth/reset-password?token=${resetToken}`;
-    await sendVerificationEmail(
-      user.email,
-      'Password Reset Request',
-      `Click here to reset: ${resetLink}`
-    );
+    // Generate email verification token
+    const resetLink = jwt.sign({ email }, process.env.JWT_SECRET as string, {
+      expiresIn: '1h',
+    });
+    console.log(resetLink);
+
+    // Send verification email
+    await sendResetLink(user.email, resetToken);
 
     return res.json({ message: 'Reset email sent' });
   } catch (error) {
@@ -147,17 +160,24 @@ export const resetPassword = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
-  const { token, newPassword } = req.body;
+  const token = req.body.token || req.query.token; // Extract token from body or query
+  const { newPassword } = req.body;
+
+  if (!token) {
+    return res.status(400).json({ message: 'Token is required' });
+  }
 
   try {
     const user = await User.findOne({
       resetPasswordToken: token,
-      resetPasswordExpires: { $gt: Date.now() },
+      resetPasswordExpires: { $gt: Date.now() }, // Ensure the token is still valid
     });
 
-    if (!user)
+    if (!user) {
       return res.status(400).json({ message: 'Invalid or expired token' });
+    }
 
+    // Hash the new password and clear reset token fields
     user.password = await bcrypt.hash(newPassword, 10);
     user.resetPasswordToken = undefined;
     user.resetPasswordExpires = undefined;
@@ -171,14 +191,26 @@ export const resetPassword = async (
   }
 };
 
+
 // Email Verification
 export const verifyEmail = async (req: Request, res: Response) => {
   const { token } = req.query;
+  console.log(token);
+  if (!token) return res.status(400).json({ message: 'Token is required' });
 
   try {
+    // Verify JWT token
+    const decoded = jwt.verify(
+      token as string,
+      process.env.JWT_SECRET as string
+    ) as { email: string };
+
+    if (!decoded || !decoded.email) {
+      return res.status(400).json({ message: 'Invalid or expired token' });
+    }
+
     const user = await User.findOne({
-      emailVerificationToken: token,
-      emailVerificationExpires: { $gt: Date.now() },
+      email: decoded.email,
     });
 
     if (!user)

@@ -38,6 +38,13 @@ const UserSchema: Schema<IUser> = new Schema(
   },
   { timestamps: true } // Adds createdAt and updatedAt fields
 );
-
+// This will ensure the emailVerificationToken is excluded from the JSON output
+UserSchema.set('toJSON', {
+  transform: function (doc, ret) {
+    delete ret.emailVerificationToken; // Exclude emailVerificationToken from the output
+    delete ret.__v; // Optional: to exclude the version key
+    return ret;
+  },
+});
 const User = mongoose.model<IUser & Document>('User', UserSchema);
 export default User;
