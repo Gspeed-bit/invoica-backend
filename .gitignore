@@ -1,23 +1,26 @@
-# Node modules
+# Ignore sensitive environment files for backend
+.env
+
+# Ignore node_modules (installed packages)
 node_modules/
 
-# Build directories for Next.js (Frontend)
-.next/
-out/
+# Ignore log files
+logs/
+
+# Ignore generated files like build folders
 dist/
+build/
 
-# Environment variable files (Local)
-.env.local
-.env.*.local
+# Ignore TypeScript and JavaScript source maps
+*.tsbuildinfo
+*.map
 
-# Logs
-npm-debug.log*
-yarn-debug.log*
-
-# IDE folders
-.idea/
+# Ignore IDE settings or workspace configurations (optional)
 .vscode/
+.idea/
 
-# Operating system files
+# Ignore OS-specific files
 .DS_Store
-Thumbs.db
+
+# Ignore any other sensitive files or folders
+*.log
