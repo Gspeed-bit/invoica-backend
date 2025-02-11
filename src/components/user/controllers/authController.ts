@@ -3,7 +3,10 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import User from '../models/userModel';
 import crypto from 'crypto';
-import { sendResetLink, sendVerificationEmail } from 'src/utils/email/emailUtils';
+import {
+  sendResetLink,
+  sendVerificationEmail,
+} from 'src/utils/email/emailUtils';
 import { sanitizeUser } from 'src/sanitizeUser';
 
 export const register = async (req: Request, res: Response) => {
@@ -19,6 +22,9 @@ export const register = async (req: Request, res: Response) => {
     confirmPassword,
   } = req.body;
 
+  console.log('Received Data:', req.body); // Debugging step
+  console.log('Received Password:', password);
+  console.log('Received Confirm Password:', confirmPassword);
   try {
     // Validation for password match
     if (password !== confirmPassword) {
@@ -191,11 +197,9 @@ export const resetPassword = async (
   }
 };
 
-
 // Email Verification
 export const verifyEmail = async (req: Request, res: Response) => {
   const { token } = req.query;
-  console.log(token);
   if (!token) return res.status(400).json({ message: 'Token is required' });
 
   try {

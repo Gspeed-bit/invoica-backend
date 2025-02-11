@@ -1,10 +1,7 @@
 import nodemailer from 'nodemailer';
 import { emailStyles } from './emailStyles';
 
-export const sendVerificationEmail = async (
-  email: string,
-  code: string,
-) => {
+export const sendVerificationEmail = async (email: string, code: string) => {
   if (!process.env.EMAIL || !process.env.EMAIL_PASSWORD) {
     throw new Error(
       'Email credentials are not set in the environment variables.'
@@ -29,9 +26,7 @@ export const sendVerificationEmail = async (
     <p style="${emailStyles.paragraph}">
       If you didn't create this account, you can safely ignore this email.
     </p>
-    <p style="${emailStyles.paragraph}">
-      Verification Code: <strong>${code}</strong>
-    </p>
+  
     <p style="text-align: center;">
       <a href="http://localhost:5000/verify?token=${code}" style="${emailStyles.button}">Verify Email</a>
       
@@ -53,8 +48,6 @@ export const sendVerificationEmail = async (
     html: htmlMessage,
   });
 };
-
-
 
 export const sendResetLink = async (email: string, resetToken: string) => {
   if (!process.env.EMAIL || !process.env.EMAIL_PASSWORD) {
