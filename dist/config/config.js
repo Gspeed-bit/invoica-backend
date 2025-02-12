@@ -25,6 +25,8 @@ const getKeys = () => {
         emailPassword: env.EMAIL_PASSWORD || '',
         adminCode: env.ADMIN_CODE || '',
         codeExpirationMinutes: env.CODE_EXPIRATION_MINUTES || '2',
+        SMTP_PORT: env.SMTP_PORT || '587',
+        CLIENT_URL: env.WEB_APP_LINK || 'http://localhost:3000',
     };
     // Validate required keys
     const missingKeys = Object.entries(keys)

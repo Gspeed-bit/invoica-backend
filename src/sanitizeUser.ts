@@ -7,13 +7,23 @@ import { Document } from 'mongoose';
  * @returns Sanitized user object.
  */
 export const sanitizeUser = <T extends Record<string, unknown>>(
-  user: T | Document, // Accept plain object or Mongoose document
+  user: T | Document,
   fieldsToExclude: (keyof T)[] = []
 ): Partial<T> => {
-  // If user is a Mongoose document, convert it to a plain object
   const userObject = user instanceof Document ? user.toObject() : { ...user };
 
-  // Remove each field from the object
+  // Ensure timestamps are always returned as ISO strings
+  if (userObject.createdAt) {
+    userObject.createdAt = new Date(
+      userObject.createdAt as string | number
+    ).toISOString();
+  }
+  if (userObject.updatedAt) {
+    userObject.updatedAt = new Date(
+      userObject.updatedAt as string | number
+    ).toISOString();
+  }
+
   fieldsToExclude.forEach((field) => delete userObject[field]);
 
   return userObject;

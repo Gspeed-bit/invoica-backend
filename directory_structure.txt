@@ -1,22 +1,74 @@
 .
 ├── .env
 ├── .eslintrc.json
+├── .gitignore
 ├── README.md
 ├── directory_structure.txt
 ├── dist
+│   ├── components
+│   │   └── user
+│   │       ├── controllers
+│   │       │   ├── authController.js
+│   │       │   ├── chatController.js
+│   │       │   ├── notificationController.js
+│   │       │   └── userController.js
+│   │       ├── models
+│   │       │   ├── chatModel.js
+│   │       │   ├── notificationModel.js
+│   │       │   └── userModel.js
+│   │       ├── routes
+│   │       │   ├── authRoutes.js
+│   │       │   ├── chatRoutes.js
+│   │       │   ├── notificationRoutes.js
+│   │       │   └── userRoutes.js
+│   │       └── types
+│   │           └── userTypes.js
 │   ├── config
 │   │   ├── config.js
 │   │   └── mongoose.js
 │   ├── index.js
-│   └── swaggerConfig.js
+│   ├── middleware
+│   │   ├── authMiddleware.js
+│   │   ├── fileUpload
+│   │   │   └── multer.js
+│   │   ├── middleware
+│   │   │   └── authMiddleware.js
+│   │   └── userAndAdminMiddleware
+│   │       ├── authMiddleware.js
+│   │       └── protect.js
+│   ├── sanitizeUser.js
+│   ├── swaggerConfig.js
+│   └── utils
+│       ├── email
+│       │   ├── emailStyles.js
+│       │   └── emailUtils.js
+│       └── email.js
 ├── package-lock.json
 ├── package.json
 ├── src
+│   ├── components
+│   │   └── user
+│   │       ├── controllers
+│   │       │   └── authController.ts
+│   │       ├── models
+│   │       │   └── userModel.ts
+│   │       ├── routes
+│   │       │   └── authRoutes.ts
+│   │       └── types
+│   │           ├── express.d.ts
+│   │           └── userTypes.ts
 │   ├── config
 │   │   ├── config.ts
 │   │   └── mongoose.ts
 │   ├── index.ts
-│   └── swaggerConfig.ts
+│   ├── middleware
+│   │   └── authMiddleware.ts
+│   ├── sanitizeUser.ts
+│   ├── swaggerConfig.ts
+│   └── utils
+│       └── email
+│           ├── emailStyles.ts
+│           └── emailUtils.ts
 └── tsconfig.json
 
-5 directories, 15 files
+26 directories, 46 files

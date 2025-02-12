@@ -1,44 +1,54 @@
+// apollo-server.ts
 import express from 'express';
-
-import cors from 'cors';
+import { ApolloServer } from 'apollo-server-express';
+import dotenv from 'dotenv';
 import { connectToMongoose } from './config/mongoose';
-import expressBasicAuth from 'express-basic-auth';
-import swaggerDocs from './swaggerConfig';
-import swaggerUI from 'swagger-ui-express';
-import { KEYS } from 'config/config';
-import authRoutes from './components/user/routes/authRoutes';
+import { typeDefs } from './graphql/schema/auth.schema';
+import { resolvers } from './graphql/resolvers/resolvers';
+import jwt from 'jsonwebtoken';
+import { KEYS } from 'src/config/config'; // Adjust the path based on your config location
 
-const app = express();
-app.use(cors());
-app.use(express.json());
+dotenv.config();
 
-app.get('/', (req, res) => {
-  res.send('Welcome to the Invoica Backend');
-});
+const JWT_SECRET = KEYS.jwtSecret;
 
-// MongoDB connection
-connectToMongoose()
-  .then(() => {
-    console.log('MongoDB connected');
-  })
-  .catch((err) => {
-    console.error('Error connecting to MongoDB:', err);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const context = ({ req }: { req: any }) => {
+  const token = req.headers.authorization?.split(' ')[1];
+
+  if (token) {
+    try {
+      const decoded = jwt.verify(token, JWT_SECRET);
+      return { req: { user: decoded } };
+    } catch (error) {
+      console.error('Token verification failed:', error);
+      return { req: { user: null } };
+    }
+  }
+
+  return { req: { user: null } };
+};
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const app = express() as any;
+
+const startServer = async () => {
+  await connectToMongoose();
+
+  const server = new ApolloServer({
+    typeDefs,
+    resolvers,
+    context,
   });
 
-  app.use('/', authRoutes);
+  await server.start();
+  server.applyMiddleware({ app });
 
-app.use(
-  '/api-docs',
-  expressBasicAuth({
-    users: { [KEYS.serverUsername]: KEYS.serverPassword },
-    challenge: true,
-    realm: 'Protected API',
-  }),
-  swaggerUI.serve,
-  swaggerUI.setup(swaggerDocs)
-);
-// Start the server
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
+  app.listen(4000, () => {
+    console.log(
+      `🚀 Server running at http://localhost:4000${server.graphqlPath}`
+    );
+  });
+};
+
+startServer();

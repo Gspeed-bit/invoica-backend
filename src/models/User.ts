@@ -1,6 +1,7 @@
+// models/User.ts
 import mongoose, { Schema, Document } from 'mongoose';
 
-interface IUser extends Document {
+export interface IUser extends Document {
   firstName: string;
   lastName: string;
   email: string;
@@ -14,6 +15,8 @@ interface IUser extends Document {
   emailVerificationExpires?: Date;
   resetPasswordToken?: string;
   resetPasswordExpires?: Date;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const UserSchema: Schema<IUser> = new Schema(
@@ -24,7 +27,7 @@ const UserSchema: Schema<IUser> = new Schema(
     username: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     phone: { type: String, required: true },
-    businessName: { type: String }, // Optional for business account type
+    businessName: { type: String },
     accountType: {
       type: String,
       enum: ['individual', 'business'],
@@ -36,15 +39,17 @@ const UserSchema: Schema<IUser> = new Schema(
     resetPasswordToken: { type: String },
     resetPasswordExpires: { type: Date },
   },
-  { timestamps: true } // Adds createdAt and updatedAt fields
+  { timestamps: true }
 );
-// This will ensure the emailVerificationToken is excluded from the JSON output
+
 UserSchema.set('toJSON', {
   transform: function (doc, ret) {
-    delete ret.emailVerificationToken; // Exclude emailVerificationToken from the output
-    delete ret.__v; // Optional: to exclude the version key
+    ret.id = ret._id; // Ensure id is present
+    delete ret.__v;
     return ret;
   },
 });
+
+
 const User = mongoose.model<IUser & Document>('User', UserSchema);
 export default User;
